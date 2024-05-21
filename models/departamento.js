@@ -1,7 +1,8 @@
+// models/department.js
 const Sequelize = require("sequelize");
 
 module.exports = (sequelize) => {
-  const Product = sequelize.define("Product", {
+  const Department = sequelize.define("Department", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -10,17 +11,10 @@ module.exports = (sequelize) => {
     name: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
     },
     description: {
       type: Sequelize.STRING,
-      allowNull: false,
-    },
-    price: {
-      type: Sequelize.FLOAT,
-      allowNull: false,
     },
   });
-
-  return Product;
+  return Department;
 };

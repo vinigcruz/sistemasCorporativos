@@ -2,7 +2,7 @@
   "development": {
     "username": "devuser",
     "password": "dev@123",
-    "database": "Sistemas",
+    "database": "sistemascorporativos",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
