@@ -1,13 +1,17 @@
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const bcrypt = require("bcrypt"); //bcrypt
+const db = require("./models");
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var depositosRouter = require("./routes/depositos");
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
+const depositosRouter = require("./routes/depositos");
+const quotationRoutes = require('./routes/cotacao');
+const purchaseRoutes = require('./routes/compras');
 
-var app = express();
+const app = express();
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -19,14 +23,10 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/login", usersRouter);
 app.use("/depositos", depositosRouter);
+app.use('/quotations', quotationRoutes);
+app.use('/purchases', purchaseRoutes);
 
-module.exports = app;
-
-const bcrypt = require("bcrypt"); //bcrypt
-const db = require("./models");
-const { error } = require("console");
-
-// Função para criptografar a senha antes de criar um novo usuário
+// Middleware para criptografar a senha antes de criar um novo usuário
 async function hashPassword(req, res, next) {
   if (req.body.senha) {
     try {
@@ -41,30 +41,32 @@ async function hashPassword(req, res, next) {
   }
 }
 
-app.post("/users/novoUsuario", hashPassword);
-
-//aqui será aplicado as migrations(integrar com o banco de dados)
-async function ApplyMigrations() {
+// Rota para criar novo usuário
+app.post("/users/novoUsuario", hashPassword, async (req, res) => {
   try {
-    migration_config = {
-      create: true,
-      alter: true,
-    };
+    const newUser = await db.User.create(req.body);
+    res.status(201).json(newUser);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao criar usuário." });
+  }
+});
 
-    await db.sequelize.sync({
-      alter: migration_config.alter,
-    });
+// Aplicar migrações
+async function applyMigrations() {
+  try {
+    await db.sequelize.sync({ alter: true });
     console.log("Sincronização com o banco realizada");
   } catch (error) {
     console.log("Erro sincronizando o banco de dados", error);
   }
 }
 
-//acionar a sincrinzação com o banco
-ApplyMigrations();
+// Acionar a sincronização com o banco
+applyMigrations();
 
-var port = "5000";
-app.listen(port, function () {
-  console.log("Server runing on port" + port);
-  module.exports = app;
+const port = process.env.PORT || "5000";
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
+
+module.exports = app;
