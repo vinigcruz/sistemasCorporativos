@@ -2,14 +2,16 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-const bcrypt = require("bcrypt"); //bcrypt
+const bcrypt = require("bcrypt"); 
 const db = require("./models");
+const sequelize = require('./config/database'); // Configuração do Sequelize
 
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
+const usuariosRouter = require("./routes/usuarios");
 const depositosRouter = require("./routes/depositos");
-const quotationRoutes = require('./routes/cotacao');
-const purchaseRoutes = require('./routes/compras');
+const cotacaoRoutes = require('./routes/cotacao');
+const comprasRoutes = require('./routes/compras');
+const contasPagarRoutes = require('./routes/contasPagarRoutes');
 
 const app = express();
 
@@ -20,11 +22,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/usuarios", usersRouter);
 app.use("/login", usersRouter);
 app.use("/depositos", depositosRouter);
-app.use('/quotations', quotationRoutes);
-app.use('/purchases', purchaseRoutes);
+app.use('/cotacoes', quotationRoutes);
+app.use('/compras', purchaseRoutes);
+app.use('/api/contas-pagar', contasPagarRoutes);
 
 // Middleware para criptografar a senha antes de criar um novo usuário
 async function hashPassword(req, res, next) {
